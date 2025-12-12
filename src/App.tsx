@@ -1,13 +1,10 @@
-import {Card, CardBody, } from "@heroui/react";
+import { ChatComponent } from "./feature-chat/chat-component";
 
 export default function App() {
 
   return (
-    <Card className="max-w-[340px]">
-      <CardBody>
-        Hello World
-      </CardBody>
-    </Card>
+    <ChatComponent>
+    </ChatComponent>
   );
 }
 
