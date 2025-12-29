@@ -2,6 +2,7 @@ import { Button, Card, CardBody, CardFooter, CardHeader, Divider, ScrollShadow, 
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useChatSocket } from "../hooks/useChatSocket";
+import { ChatMessages } from "./chat-message-component";
 
 
 type ChatFormValues = {
@@ -21,10 +22,12 @@ export function ChatComponent () {
 
     const [chatMessages, setChatMessages] = useState<ChatMessages[]>([]);
     const [currentBotMessage, setCurrentBotMessage] = useState("");
+    const [isTyping, setIsTyping] = useState(false);
 
     const onSubmit = (data: ChatFormValues) => {
         console.log(data.message);
 
+        setIsTyping(true);
         send(data.message);
 
         setChatMessages(prev => [...prev, {text: data.message, sender: 'me'}]);
@@ -37,6 +40,7 @@ export function ChatComponent () {
     useEffect(()=> {
         if(!messagResp) return;
 
+        setIsTyping(false);
         setCurrentBotMessage(oldMsg => oldMsg + messagResp);
     }, [messagResp])
 
@@ -52,7 +56,7 @@ export function ChatComponent () {
     return(
         <>
         <div className="flex flex-row h-screen items-center justify-center ">
-                <Card className="w-96 h-96">
+                <Card className="w-full h-full">
                     <CardHeader>
                         <h4>
                             Smart Track Assistant
@@ -61,26 +65,26 @@ export function ChatComponent () {
                     <Divider/>
                     <CardBody>
                         <ScrollShadow className="flex flex-col">
-                           { chatMessages.map((message, index) => {
-                                const isOwnMessage = message.sender === 'me'
-                                return (
-                                    <div key={index} className={`p-1 mb-1 w-max max-w-[75%] rounded ${
-                                        isOwnMessage ? 'bg-blue-100 self-end' : ' bg-gray-100 self-start'
-                                    }`}>
-                                        {message.text}
-                                    </div>
-                                )  
-                            })}
+                           { chatMessages.map((message, index) => 
+                                <ChatMessages key={index} text={message.text} isOwn={message.sender === "me"}/>
+                            )}
 
-                            {currentBotMessage && (<div className="p-1 mb-1 w-max max-w-[75%] rounded bg-gray-100 self-start">
-                                    {currentBotMessage}
+                            {currentBotMessage && (
+                                <ChatMessages key="streaming-bot" text={currentBotMessage} isOwn={false}/>
+                            )}
+
+                            {isTyping && (
+                                <div className="p-2 max-w-[50%] bg-gray-100 rounded self-start flex gap-1">
+                                    <span className="w-2 h-2 bg-gray-700 rounded-full animate-bounce delay-75"></span>
+                                    <span className="w-2 h-2 bg-gray-700 rounded-full animate-bounce delay-150"></span>
+                                    <span className="w-2 h-2 bg-gray-700 rounded-full animate-bounce delay-300"></span>
                                 </div>
-)}
+                            )}
                         </ScrollShadow>
                     </CardBody>
                     <Divider/>
-                    <CardFooter>
-                        <form onSubmit={handleSubmit(onSubmit)}>
+                    <CardFooter className="w-full">
+                        <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
                             <div className="flex flex-row gap-1">
                                 <Textarea {...register("message")} minRows={1} placeholder="Nachricht eingeben.."/>
                                 <Button type="submit">Senden</Button>
