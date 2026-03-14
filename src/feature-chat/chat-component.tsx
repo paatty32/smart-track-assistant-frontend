@@ -16,9 +16,9 @@ type ChatMessages = {
 
 export function ChatComponent () {
 
-    const {send, messagResp, isDone, reset} = useChatSocket();
+    const {send, messagResp, isDone, resetMessageAnswer} = useChatSocket();
 
-    const {register, handleSubmit, setValue} = useForm<ChatFormValues>();
+    const {register, handleSubmit, reset} = useForm<ChatFormValues>();
 
     const [chatMessages, setChatMessages] = useState<ChatMessages[]>([]);
     const [currentBotMessage, setCurrentBotMessage] = useState("");
@@ -33,7 +33,7 @@ export function ChatComponent () {
         setChatMessages(prev => [...prev, {text: data.message, sender: 'me'}]);
         setCurrentBotMessage("");
 
-        setValue("message", "");
+        reset();
     };
 
     //Streaming anzeigen
@@ -50,7 +50,7 @@ export function ChatComponent () {
 
         setChatMessages(prev => [...prev, {text: currentBotMessage, sender: "bot"}])
         setCurrentBotMessage("");
-        reset();
+        resetMessageAnswer();
     }, [isDone])
 
     return(
@@ -89,9 +89,7 @@ export function ChatComponent () {
                                 <Textarea {...register("message")} minRows={1} placeholder="Nachricht eingeben.."/>
                                 <Button type="submit">Senden</Button>
                             </div>
-                    
                         </form>
-                       
                     </CardFooter>
                 </Card>
         </div>
