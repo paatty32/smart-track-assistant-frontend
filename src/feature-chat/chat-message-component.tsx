@@ -10,10 +10,7 @@ type Props = {
 export function ChatMessages({text, isOwn}: Props) {
     return(
         <>
-             <div className={`p-1 mb-1 w-max max-w-[75%] rounded ${
-                                        isOwn ? 'bg-blue-100 self-end' : ' bg-gray-100 self-start'
-                                    }`}>
-
+             <div className={`p-1 mb-1 w-max max-w-[75%] rounded ${isOwn ? 'bg-blue-100 self-end' : ' bg-gray-100 self-start'}`}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {text}
                 </ReactMarkdown>

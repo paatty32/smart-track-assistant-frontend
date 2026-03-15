@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { useChatSocket } from "../hooks/useChatSocket";
 import { ChatMessages } from "./chat-message-component";
 
-
 type ChatFormValues = {
     message: string;
 }
@@ -35,6 +34,16 @@ export function ChatComponent () {
 
         reset();
     };
+
+    const handleOnKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+            console.log((event.currentTarget as HTMLTextAreaElement).value);
+            event.preventDefault();
+            onEnterSubmit()
+        }
+    }
+
+    const onEnterSubmit = handleSubmit(onSubmit);
 
     //Streaming anzeigen
     useEffect(()=> {
@@ -86,7 +95,7 @@ export function ChatComponent () {
                     <CardFooter className="w-full">
                         <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
                             <div className="flex flex-row gap-1">
-                                <Textarea {...register("message")} minRows={1} placeholder="Nachricht eingeben.."/>
+                                <Textarea onKeyDown={handleOnKeyDown}{...register("message")} minRows={1} placeholder="Nachricht eingeben.."/>
                                 <Button type="submit">Senden</Button>
                             </div>
                         </form>
