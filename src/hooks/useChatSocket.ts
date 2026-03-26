@@ -28,7 +28,7 @@ export function useChatSocket() {
         sendMessage(JSON.stringify({text}));
     }
 
-    function reset() {
+    function resetMessageAnswer() {
         setMessageAnswer("");
         setIsDone(false);
     }
@@ -37,6 +37,6 @@ export function useChatSocket() {
         send,
         messagResp,
         isDone,
-        reset
+        resetMessageAnswer
     }
 }

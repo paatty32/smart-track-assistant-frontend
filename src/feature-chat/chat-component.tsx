@@ -1,9 +1,8 @@
 import { Button, Card, CardBody, CardFooter, CardHeader, Divider, ScrollShadow, Textarea } from "@heroui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useChatSocket } from "../hooks/useChatSocket";
 import { ChatMessages } from "./chat-message-component";
-
 
 type ChatFormValues = {
     message: string;
@@ -16,13 +15,15 @@ type ChatMessages = {
 
 export function ChatComponent () {
 
-    const {send, messagResp, isDone, reset} = useChatSocket();
+    const {send, messagResp, isDone, resetMessageAnswer} = useChatSocket();
 
-    const {register, handleSubmit, setValue} = useForm<ChatFormValues>();
+    const {register, handleSubmit, reset} = useForm<ChatFormValues>();
 
     const [chatMessages, setChatMessages] = useState<ChatMessages[]>([]);
     const [currentBotMessage, setCurrentBotMessage] = useState("");
     const [isTyping, setIsTyping] = useState(false);
+
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     const onSubmit = (data: ChatFormValues) => {
         console.log(data.message);
@@ -33,8 +34,18 @@ export function ChatComponent () {
         setChatMessages(prev => [...prev, {text: data.message, sender: 'me'}]);
         setCurrentBotMessage("");
 
-        setValue("message", "");
+        reset();
     };
+
+    const handleOnKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+            console.log((event.currentTarget as HTMLTextAreaElement).value);
+            event.preventDefault();
+            onEnterSubmit()
+        }
+    }
+
+    const onEnterSubmit = handleSubmit(onSubmit);
 
     //Streaming anzeigen
     useEffect(()=> {
@@ -50,8 +61,17 @@ export function ChatComponent () {
 
         setChatMessages(prev => [...prev, {text: currentBotMessage, sender: "bot"}])
         setCurrentBotMessage("");
-        reset();
+        resetMessageAnswer();
     }, [isDone])
+
+    useEffect(()=>{
+        if(!scrollRef.current) return;
+
+        scrollRef.current.scrollTo({
+            top: scrollRef.current.scrollHeight,
+            behavior: "smooth"
+        });
+    }, [chatMessages, currentBotMessage, isTyping])
 
     return(
         <>
@@ -64,11 +84,11 @@ export function ChatComponent () {
                     </CardHeader>
                     <Divider/>
                     <CardBody>
-                        <ScrollShadow className="flex flex-col">
+                        <ScrollShadow ref={scrollRef} className="flex flex-col">
                            { chatMessages.map((message, index) => 
                                 <ChatMessages key={index} text={message.text} isOwn={message.sender === "me"}/>
                             )}
-
+                            
                             {currentBotMessage && (
                                 <ChatMessages key="streaming-bot" text={currentBotMessage} isOwn={false}/>
                             )}
@@ -86,12 +106,10 @@ export function ChatComponent () {
                     <CardFooter className="w-full">
                         <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
                             <div className="flex flex-row gap-1">
-                                <Textarea {...register("message")} minRows={1} placeholder="Nachricht eingeben.."/>
+                                <Textarea onKeyDown={handleOnKeyDown}{...register("message")} minRows={1} placeholder="Nachricht eingeben.."/>
                                 <Button type="submit">Senden</Button>
                             </div>
-                    
                         </form>
-                       
                     </CardFooter>
                 </Card>
         </div>
